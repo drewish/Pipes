@@ -119,11 +119,11 @@
 		5F0075F014A4E10500CAC4B3 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 5F0075EF14A4E10500CAC4B3 /* main.m */; };
 		5F0075F314A4E10500CAC4B3 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 5F0075F214A4E10500CAC4B3 /* AppDelegate.m */; };
 		5F0075F614A4E10500CAC4B3 /* RootViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 5F0075F514A4E10500CAC4B3 /* RootViewController.m */; };
-		5F0075F914A4E10500CAC4B3 /* HelloWorldLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = 5F0075F814A4E10500CAC4B3 /* HelloWorldLayer.m */; };
 		5F00760214A4E16500CAC4B3 /* StartScreenLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = 5F00760114A4E16500CAC4B3 /* StartScreenLayer.m */; };
 		5F083BFB14A4E6AF00FC62A0 /* GameLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = 5F083BFA14A4E6AE00FC62A0 /* GameLayer.m */; };
 		5F702FDF14A5369C00828E0F /* Board.tmx in Resources */ = {isa = PBXBuildFile; fileRef = 5F702FDD14A5369C00828E0F /* Board.tmx */; };
 		5F702FE314A53BD800828E0F /* Pipe-Tiles.png in Resources */ = {isa = PBXBuildFile; fileRef = 5F702FE214A53BD800828E0F /* Pipe-Tiles.png */; };
+		5F7FDDE214A8D29900DD19CA /* Tile.m in Sources */ = {isa = PBXBuildFile; fileRef = 5F7FDDE114A8D29900DD19CA /* Tile.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -355,8 +355,6 @@
 		5F0075F214A4E10500CAC4B3 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		5F0075F414A4E10500CAC4B3 /* RootViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RootViewController.h; sourceTree = "<group>"; };
 		5F0075F514A4E10500CAC4B3 /* RootViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RootViewController.m; sourceTree = "<group>"; };
-		5F0075F714A4E10500CAC4B3 /* HelloWorldLayer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HelloWorldLayer.h; sourceTree = "<group>"; };
-		5F0075F814A4E10500CAC4B3 /* HelloWorldLayer.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = HelloWorldLayer.m; sourceTree = "<group>"; };
 		5F0075FA14A4E10500CAC4B3 /* GameConfig.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GameConfig.h; sourceTree = "<group>"; };
 		5F00760014A4E16500CAC4B3 /* StartScreenLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StartScreenLayer.h; sourceTree = "<group>"; };
 		5F00760114A4E16500CAC4B3 /* StartScreenLayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StartScreenLayer.m; sourceTree = "<group>"; };
@@ -364,6 +362,8 @@
 		5F083BFA14A4E6AE00FC62A0 /* GameLayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GameLayer.m; sourceTree = "<group>"; };
 		5F702FDD14A5369C00828E0F /* Board.tmx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = Board.tmx; path = Resources/Board.tmx; sourceTree = "<group>"; };
 		5F702FE214A53BD800828E0F /* Pipe-Tiles.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Pipe-Tiles.png"; path = "Resources/Pipe-Tiles.png"; sourceTree = "<group>"; };
+		5F7FDDE014A8D29900DD19CA /* Tile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Tile.h; sourceTree = "<group>"; };
+		5F7FDDE114A8D29900DD19CA /* Tile.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Tile.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -424,12 +424,12 @@
 				5F0075F214A4E10500CAC4B3 /* AppDelegate.m */,
 				5F0075F414A4E10500CAC4B3 /* RootViewController.h */,
 				5F0075F514A4E10500CAC4B3 /* RootViewController.m */,
-				5F0075F714A4E10500CAC4B3 /* HelloWorldLayer.h */,
-				5F0075F814A4E10500CAC4B3 /* HelloWorldLayer.m */,
 				5F083BF914A4E6AE00FC62A0 /* GameLayer.h */,
 				5F083BFA14A4E6AE00FC62A0 /* GameLayer.m */,
 				5F00760014A4E16500CAC4B3 /* StartScreenLayer.h */,
 				5F00760114A4E16500CAC4B3 /* StartScreenLayer.m */,
+				5F7FDDE014A8D29900DD19CA /* Tile.h */,
+				5F7FDDE114A8D29900DD19CA /* Tile.m */,
 				5F0075FA14A4E10500CAC4B3 /* GameConfig.h */,
 				5F00749D14A4E10200CAC4B3 /* Resources */,
 				5F0074B114A4E10200CAC4B3 /* libs */,
@@ -922,9 +922,9 @@
 				5F0075F014A4E10500CAC4B3 /* main.m in Sources */,
 				5F0075F314A4E10500CAC4B3 /* AppDelegate.m in Sources */,
 				5F0075F614A4E10500CAC4B3 /* RootViewController.m in Sources */,
-				5F0075F914A4E10500CAC4B3 /* HelloWorldLayer.m in Sources */,
 				5F00760214A4E16500CAC4B3 /* StartScreenLayer.m in Sources */,
 				5F083BFB14A4E6AF00FC62A0 /* GameLayer.m in Sources */,
+				5F7FDDE214A8D29900DD19CA /* Tile.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -31,10 +31,7 @@
 {
 	// always call "super" init
 	// Apple recommends to re-assign "self" with the "super" return value
-	if( (self=[super init])) {
-		// ask director the the window size
-		CGSize size = [[CCDirector sharedDirector] winSize];
-        
+	if( (self=[super init])) {        
 		// Font Item
 		CCMenuItemFont *itemNew = [CCMenuItemFont itemFromString:@"New Game" block:^(id sender) {
             [[CCDirector sharedDirector] replaceScene: [GameLayer scene]];
