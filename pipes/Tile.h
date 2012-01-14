@@ -19,8 +19,31 @@
 +(BOOL)connectSouth;
 +(BOOL)connectWest;
 -(id)initWithSprite:(CCSprite*) s;
-
+-(void)flowInFromNorth;
+-(void)flowInFromEast;
+-(void)flowInFromSouth;
+-(void)flowInFromWest;
 @end
+
+@interface TileEmpty : Tile 
+@end
+
+@interface TilePump : Tile
+@end
+
+@interface TileN : TilePump
+@end
+
+@interface TileS : TilePump
+@end
+
+@interface TileE : TilePump
+@end
+
+@interface TileW : TilePump
+@end
+
+
 
 @interface TileSE : Tile
 @end
@@ -43,14 +66,3 @@
 @interface TileNS : Tile
 @end
 
-@interface TileN : Tile
-@end
-
-@interface TileS : Tile
-@end
-
-@interface TileE : Tile
-@end
-
-@interface TileW : Tile
-@end

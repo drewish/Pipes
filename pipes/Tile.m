@@ -7,28 +7,13 @@
 //
 
 #import "Tile.h"
+#import "StartScreenLayer.h"
 
 @implementation Tile
-
-+(BOOL)connectNorth
-{
-    return false;
-}
-
-+(BOOL)connectEast
-{
-    return false;
-}
-
-+(BOOL)connectSouth
-{
-    return false;
-}
-
-+(BOOL)connectWest
-{
-    return false;
-}
++(BOOL)connectNorth {return false; }
++(BOOL)connectEast {return false; }
++(BOOL)connectSouth {return false; }
++(BOOL)connectWest { return false; }
 
 @synthesize sprite;
 - (id)init
@@ -46,127 +31,92 @@
     }
     return self;
 }
-@end
 
-
-@implementation TileSE
-+(BOOL)connectEast
+-(void)endGame
 {
-    return true;
+    [[CCDirector sharedDirector] replaceScene:[StartScreenLayer scene]];
 }
 
-+(BOOL)connectSouth
+-(void)flowInFromNorth
 {
-    return true;
-}
-@end
-
-@implementation TileSW
-+(BOOL)connectSouth
-{
-    return true;
+    [self endGame];
 }
 
-+(BOOL)connectWest
+-(void)flowInFromEast
 {
-    return true;
-}
-@end
-
-@implementation TileEW
-+(BOOL)connectEast
-{
-    return true;
+    [self endGame];    
 }
 
-+(BOOL)connectWest
+-(void)flowInFromSouth
 {
-    return true;
+    [self endGame];
+}
+
+-(void)flowInFromWest
+{
+    [self endGame];    
 }
 @end
 
-@implementation TileNESW
-+(BOOL)connectNorth
-{
-    return true;
-}
 
-+(BOOL)connectEast
-{
-    return true;
-}
-
-+(BOOL)connectSouth
-{
-    return true;
-}
-
-+(BOOL)connectWest
-{
-    return true;
-}
+@implementation TileEmpty : Tile
 @end
 
-@implementation TileNE
-+(BOOL)connectNorth
-{
-    return true;
-}
 
-+(BOOL)connectEast
-{
-    return true;
-}
-@end
-
-@implementation TileNW
-+(BOOL)connectNorth
-{
-    return true;
-}
-
-+(BOOL)connectWest
-{
-    return true;
-}
-@end
-
-@implementation TileNS
-+(BOOL)connectNorth
-{
-    return true;
-}
-
-+(BOOL)connectSouth
-{
-    return true;
-}
+@implementation TilePump
 @end
 
 @implementation TileN
-+(BOOL)connectNorth
-{
-    return true;
-}
++(BOOL)connectNorth {return true; }
 @end
 
 @implementation TileS
-+(BOOL)connectSouth
-{
-    return true;
-}
++(BOOL)connectSouth {return true; }
 @end
 
 @implementation TileE
-+(BOOL)connectEast
-{
-    return true;
-}
++(BOOL)connectEast {return true; }
 @end
 
 @implementation TileW
-+(BOOL)connectWest
-{
-    return true;
-}
++(BOOL)connectWest {return true; }
+@end
+
+
+
+@implementation TileSE
++(BOOL)connectEast {return true; }
++(BOOL)connectSouth {return true; }
+@end
+
+@implementation TileSW
++(BOOL)connectSouth {return true; }
++(BOOL)connectWest {return true; }
+@end
+
+@implementation TileEW
++(BOOL)connectEast {return true; }
++(BOOL)connectWest {return true; }
+@end
+
+@implementation TileNESW
++(BOOL)connectNorth {return true; }
++(BOOL)connectEast {return true; }
++(BOOL)connectSouth {return true; }
++(BOOL)connectWest {return true; }
+@end
+
+@implementation TileNE
++(BOOL)connectNorth {return true; }
++(BOOL)connectEast {return true; }
+@end
+
+@implementation TileNW
++(BOOL)connectNorth {return true; }
++(BOOL)connectWest {return true; }
+@end
+
+@implementation TileNS
++(BOOL)connectNorth {return true; }
++(BOOL)connectSouth {return true; }
 @end

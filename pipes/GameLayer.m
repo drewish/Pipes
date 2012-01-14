@@ -44,27 +44,44 @@ enum {
         
         map = [CCTMXTiledMap tiledMapWithTMXFile:@"Board.tmx"];
 		[self addChild:map z:-1 tag:kTagTileMap];
-        CCTMXLayer *layer = [map layerNamed:@"Play"];
-        NSAssert( layer != nil, @"GameLayer: couldn't find the layer");
+        playLayer = [map layerNamed:@"Play"];
+        infoLayer = [map layerNamed:@"Background"];
+        NSAssert(playLayer != nil && infoLayer != nil, @"GameLayer: couldn't find the layers");
 
         // TODO: unhardcode this:
-        uint startGid = 9;
-        CGPoint pos = CGPointMake(0, 6);
-        [layer setTileGID:startGid at:pos];
-        CCSprite *tile = [layer tileAt:pos];
-        NSString *class = [[map propertiesForGID:startGid] objectForKey:@"Class"];
-        tile.userData = [[NSClassFromString(class) alloc] initWithSprite: tile];
-
-        // Quit menu item
-        CCMenuItemFont *itemQuit = [CCMenuItemFont itemFromString:@"Quit" block:^(id sender) {
+        uint pumpGid = 9;
+        CGPoint pos = CGPointMake(0, 4);
+        [playLayer setTileGID:pumpGid at:pos];
+        
+        
+        CCSprite *sidebar = [CCSprite spriteWithFile:@"Sidebar.png"];
+        sidebar.anchorPoint = CGPointMake(0, 0);
+        sidebar.position = CGPointMake(size.width - sidebar.contentSize.width, 0);
+        [sidebar.texture setAliasTexParameters];
+        [self addChild:sidebar];
+        
+                
+        CCTexture2D *tex = [[CCTextureCache sharedTextureCache] addImage:playLayer.tileset.sourceImage];
+        [tex setAliasTexParameters];
+        CGRect rect = [playLayer.tileset rectForGID:playLayer.tileset.firstGid];        
+        nextPiece = [CCSprite spriteWithTexture:tex rect:rect];
+        nextPiece.anchorPoint = CGPointZero;
+        nextPiece.position = CGPointMake(400, 224);
+        [self addChild:nextPiece];
+                
+        
+		CCSprite *spriteNormal = [CCSprite spriteWithFile:@"MenuItemQuit.png" rect:CGRectMake(0,12*0,34,12)];
+        [spriteNormal.texture setAliasTexParameters];
+		CCSprite *spriteSelected = [CCSprite spriteWithFile:@"MenuItemQuit.png" rect:CGRectMake(0,12*1,34,12)];
+		CCMenuItemSprite *itemQuit = [CCMenuItemSprite itemFromNormalSprite:spriteNormal selectedSprite:spriteSelected disabledSprite:nil block:^(id sender) {
             [[CCDirector sharedDirector] replaceScene:[StartScreenLayer scene]];
         }];
-        itemQuit.fontSize = 20;
 		
 		CCMenu *menu = [CCMenu menuWithItems:itemQuit, nil];
-        menu.position = ccp(size.width -10, size.height -50);
-//		[menu alignItemsVertically];
-        [self addChild: menu];
+        menu.anchorPoint = CGPointMake(0.5, 0);
+        menu.position = ccp(432, 16);
+        [menu alignItemsVertically];
+        [self addChild:menu];
         
         [self pickNextPiece];
 	}
@@ -95,12 +112,11 @@ enum {
 -(CGPoint) tilePositionFromTouch:(UITouch*) touch
 {
     CGPoint inPoints = [map convertTouchToNodeSpace:touch];
-    CCTMXLayer *layer = [map layerNamed:@"Play"];
     CGPoint q = {
         (int) (inPoints.x / map.tileSize.width),
         // World origin is bottom left but map coordinates are top left so flip
         // the y.
-        layer.layerSize.height - (int) (inPoints.y / map.tileSize.height) - 1
+        map.mapSize.height - (int) (inPoints.y / map.tileSize.height) - 1
     };
     return q;
 }
@@ -108,30 +124,25 @@ enum {
 -(Class)classOfGid:(uint) gid
 {
     NSString *class = [[map propertiesForGID:gid] objectForKey:@"Class"];
-    return ([class length] > 0) ? NSClassFromString(class) : nil;
+    // It's always going to be a tile.
+    return (class != nil && [class length] > 0) ? NSClassFromString(class) : [TileEmpty class];
 }
 
 -(void) ccTouchEnded:(UITouch *)touch withEvent:(UIEvent *)event
 {
-    CCTMXLayer *playLayer = [map layerNamed:@"Play"];
-    CCTMXLayer *infoLayer = [map layerNamed:@"Background"];
-
-    CGPoint pos = [self tilePositionFromTouch:touch];
-    Class nextTileClass = [self classOfGid:nextTileGid];
-    
-    NSLog(@"Touched %f, %f", pos.x, pos.y);
-    //    CCSprite *s = [layer tileAt:q];
-    if ([infoLayer tileGIDAt:pos] != 1) {
+    CGPoint pos = [self tilePositionFromTouch:touch];    
+    if (pos.x > map.mapSize.width - 1 || pos.y > map.mapSize.height - 1 || [infoLayer tileGIDAt:pos] != 14) {
         return;
     }
-
-//    CGPoint pos = CGPointMake(0, 6);
-//    CCSprite *tile = [layer tileAt:pos];
-//    tile.userData = [[NSClassFromString(class) alloc] initWithSprite: tile];
     
-    [playLayer setTileGID:nextTileGid at:pos];
-    [self pickNextPiece];
-
+    CGPoint tileStart = nextPiece.position;
+    [nextPiece runAction:[CCSequence 
+                          actions:[CCMoveTo actionWithDuration: 0.25 position: [playLayer tileAt:pos].position], 
+                          [CCCallBlock actionWithBlock:^{
+                                [playLayer setTileGID:nextTileGid at:pos];
+                                [self pickNextPiece];
+                                nextPiece.position = tileStart;
+                           }], nil]];
 }
 
 -(void) ccTouchCancelled:(UITouch *)touch withEvent:(UIEvent *)event
@@ -140,46 +151,64 @@ enum {
 
 -(void) ccTouchMoved:(UITouch *)touch withEvent:(UIEvent *)event
 {
-    CCDirector *director = [CCDirector sharedDirector];
-    UIView *view = [touch view];
-	CGPoint touchLocation = [director convertToGL:[touch locationInView: view]];
-	CGPoint prevLocation = [director convertToGL:[touch previousLocationInView: view]];
-	CGPoint diff = ccpSub(touchLocation, prevLocation);
-	
-	CGPoint currentPos = [map position];
-	[map setPosition: ccpAdd(currentPos, diff)];
+//    CCDirector *director = [CCDirector sharedDirector];
+//    UIView *view = [touch view];
+//    CGPoint touchLocation = [director convertToGL:[touch locationInView: view]];
+//    CGPoint prevLocation = [director convertToGL:[touch previousLocationInView: view]];
+//    CGPoint diff = ccpSub(touchLocation, prevLocation);
+//
+//    CGPoint currentPos = [map position];
+//    [map setPosition: ccpAdd(currentPos, diff)];
 }
 
--(BOOL) gid:(uint) west canBeLeftOfGid:(uint) east
+
+-(Class)classNorthOf:(CGPoint) pos
 {
-    if (east == 0 || west == 0) {
-        return true;
+    return [self classOfGid:[playLayer tileGIDAt:CGPointMake(pos.x, pos.y - 1)]]; 
+}
+-(Class)classEastOf:(CGPoint) pos
+{
+    return [self classOfGid:[playLayer tileGIDAt:CGPointMake(pos.x + 1, pos.y)]];    
+}
+-(Class)classSouthOf:(CGPoint) pos
+{
+    return [self classOfGid:[playLayer tileGIDAt:CGPointMake(pos.x, pos.y + 1)]];
+}
+-(Class)classWestOf:(CGPoint) pos
+{
+    return [self classOfGid:[playLayer tileGIDAt:CGPointMake(pos.x - 1, pos.y)]];
+}
+
+-(BOOL) couldPlay:(Class) nextTileClass at:(CGPoint) pos
+{
+    CGSize size = map.mapSize;
+    Class adjacentClass;
+    
+    // TODO I think this logic could be simplified quite a bit.
+    
+    // Make sure there's not already a piece there.
+    NSLog(@"piece at: %d", [playLayer tileGIDAt:pos]);
+    if ([playLayer tileGIDAt:pos] > 1) {
+        return false;
     }
-    return [[self classOfGid:west] connectEast] == [[self classOfGid:east] connectWest];
-}
-
--(BOOL) couldPlay:(Class) nextTileClass at:(CGPoint) pos on: (CCTMXLayer*) playLayer
-{
-    CGSize size = playLayer.layerSize;
-    uint adjacentGid;
-
+    
     // North
     if ([nextTileClass connectNorth] && pos.y == 0) {
         return false;
     }
-    else if (pos.y > 0) {
-        adjacentGid = [playLayer tileGIDAt:CGPointMake(pos.x, pos.y - 1)];
-        if (adjacentGid != 0 && [[self classOfGid:adjacentGid] connectSouth] != [nextTileClass connectNorth]) {
+    if (pos.y > 0) {
+        adjacentClass = [self classNorthOf:pos];
+        if (adjacentClass != [TileEmpty class] && [nextTileClass connectNorth] != [adjacentClass connectSouth]) {
             return false;
         }
     }
     // East
     if ([nextTileClass connectEast] && pos.x == size.width - 1) {
-        return FALSE;
+        return false;
     }
-    else if (pos.x < size.width - 1) {
-        adjacentGid = [playLayer tileGIDAt:CGPointMake(pos.x + 1, pos.y)];
-        if (adjacentGid != 0 && [nextTileClass connectEast] != [[self classOfGid:adjacentGid] connectWest]) {
+    if (pos.x < size.width - 1) {
+        adjacentClass = [self classEastOf:pos];
+        if (adjacentClass != [TileEmpty class] && [nextTileClass connectEast] != [adjacentClass connectWest]) {
             return false;
         }
     }
@@ -187,9 +216,9 @@ enum {
     if ([nextTileClass connectSouth] && pos.y == size.height - 1) {
         return false;
     }
-    else if (pos.y < size.height - 1) {
-        adjacentGid = [playLayer tileGIDAt:CGPointMake(pos.x, pos.y + 1)];
-        if (adjacentGid != 0 && [nextTileClass connectSouth] != [[self classOfGid:adjacentGid] connectNorth]) {
+    if (pos.y < size.height - 1) {
+        adjacentClass = [self classSouthOf:pos];
+        if (adjacentClass != [TileEmpty class] && [nextTileClass connectSouth] != [adjacentClass connectNorth]) {
             return false;
         }
     }
@@ -197,9 +226,9 @@ enum {
     if ([nextTileClass connectWest] && pos.x == 0) {
         return false;
     }
-    else if (pos.x > 0) {
-        adjacentGid = [playLayer tileGIDAt:CGPointMake(pos.x - 1, pos.y)];
-        if (adjacentGid != 0 && [nextTileClass connectWest] != [[self classOfGid:adjacentGid] connectEast]) {
+    if (pos.x > 0) {
+        adjacentClass = [self classWestOf:pos];
+        if (adjacentClass != [TileEmpty class] && [nextTileClass connectWest] != [adjacentClass connectEast]) {
             return false;
         }
     }
@@ -210,19 +239,21 @@ enum {
 {
     nextTileGid = (arc4random_uniform(7)) + 2;
     Class nextTileClass = [self classOfGid:nextTileGid];
-    CCTMXLayer *playLayer = [map layerNamed:@"Play"];
-    CCTMXLayer *infoLayer = [map layerNamed:@"Background"];
-    CGSize size = infoLayer.layerSize;
-    uint disabledGid = 14;
+    CGSize size = map.mapSize;
     CGPoint pos;
     
+    CGRect rect = [playLayer.tileset rectForGID:nextTileGid];
+    [nextPiece setTextureRectInPixels:rect rotated:NO untrimmedSize:rect.size];
+    
+
     NSLog(@"Next is %@", [[map propertiesForGID:nextTileGid] objectForKey:@"Class"]);
-	for (uint x = 0; x < size.width; x++) {
-		for (uint y = 0; y < size.height; y++) {
+    for (uint x = 0; x < size.width; x++) {
+        for (uint y = 0; y < size.height; y++) {
             pos = CGPointMake(x, y);
-            [infoLayer setTileGID:([self couldPlay:nextTileClass at:pos on:playLayer] ? 1 : disabledGid) at:pos];
-		}
-	}
+            uint tileGid = [self couldPlay:nextTileClass at:pos] ? 14 : 15;
+            [infoLayer setTileGID:tileGid at:pos];
+        }
+    }
 }
 
 

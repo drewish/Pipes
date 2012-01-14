@@ -13,7 +13,11 @@
 @interface GameLayer : CCLayer {
 @private
     CCTMXTiledMap *map;
+    CCTMXLayer *playLayer;
+    CCTMXLayer *infoLayer;
+
     uint nextTileGid;
+    CCSprite *nextPiece;
 }
 
 // returns a CCScene that contains the HelloWorldLayer as the only child

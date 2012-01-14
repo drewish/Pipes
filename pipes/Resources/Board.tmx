@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" orientation="orthogonal" width="7" height="7" tilewidth="64" tileheight="64">
+<map version="1.0" orientation="orthogonal" width="6" height="5" tilewidth="64" tileheight="64">
  <tileset firstgid="1" name="Pipes" tilewidth="64" tileheight="64">
-  <image source="Pipe-Tiles.png" width="256" height="256"/>
+  <image source="PipeTiles.png" width="256" height="192"/>
   <tile id="1">
    <properties>
     <property name="Class" value="TileSE"/>
@@ -58,14 +58,35 @@
    </properties>
   </tile>
  </tileset>
- <layer name="Background" width="7" height="7">
+ <tileset firstgid="13" name="BackgroundTiles" tilewidth="64" tileheight="64">
+  <image source="BackgroundTiles.png" width="256" height="64"/>
+  <tile id="1">
+   <properties>
+    <property name="Name" value="Playable"/>
+   </properties>
+  </tile>
+  <tile id="2">
+   <properties>
+    <property name="Name" value="Invalid"/>
+   </properties>
+  </tile>
+ </tileset>
+ <tileset firstgid="17" name="FillTiles" tilewidth="64" tileheight="64">
+  <image source="FillTiles.png" width="320" height="64"/>
+ </tileset>
+ <layer name="Background" width="6" height="5">
   <data encoding="base64" compression="zlib">
-   eJxjZGBgYBziGAAT6AAy
+   eJzjY2Bg4BsADABmMAGl
   </data>
  </layer>
- <layer name="Play" width="7" height="7">
+ <layer name="Fill" width="6" height="5">
   <data encoding="base64" compression="zlib">
-   eJxjYBgagJGBoQGXHAANYACC
+   eJwTZGBgEBwADAB7/AH/
+  </data>
+ </layer>
+ <layer name="Play" width="6" height="5">
+  <data encoding="base64" compression="zlib">
+   eJxjZGBgYBwADAAHvAAf
   </data>
  </layer>
 </map>
