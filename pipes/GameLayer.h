@@ -18,10 +18,12 @@
 
     uint nextTileGid;
     CCSprite *nextPiece;
+    CCSprite *pump;
 }
 
 // returns a CCScene that contains the HelloWorldLayer as the only child
 +(CCScene *) scene;
 -(Class)classOfGid:(uint) gid;
 -(void) pickNextPiece;
+-(void) beginPumping;
 @end

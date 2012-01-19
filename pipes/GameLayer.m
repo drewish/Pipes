@@ -11,10 +11,6 @@
 
 @implementation GameLayer
 
-enum {
-    kTagTileMap = 1,
-};
-
 // returns a CCScene that contains the HelloWorldLayer as the only child
 +(CCScene *) scene
 {
@@ -43,7 +39,7 @@ enum {
 		CGSize size = [[CCDirector sharedDirector] winSize];
         
         map = [CCTMXTiledMap tiledMapWithTMXFile:@"Board.tmx"];
-		[self addChild:map z:-1 tag:kTagTileMap];
+        [self addChild:map z:-1];
         playLayer = [map layerNamed:@"Play"];
         infoLayer = [map layerNamed:@"Background"];
         NSAssert(playLayer != nil && infoLayer != nil, @"GameLayer: couldn't find the layers");
@@ -52,15 +48,18 @@ enum {
         uint pumpGid = 9;
         CGPoint pos = CGPointMake(0, 4);
         [playLayer setTileGID:pumpGid at:pos];
+        CCSprite *tile = [playLayer tileAt:pos];
+        pump = [[[self classOfGid:pumpGid] alloc] initWithSprite: tile];
+        tile.userData = pump;
         
-        
+        // Sidebar
         CCSprite *sidebar = [CCSprite spriteWithFile:@"Sidebar.png"];
         sidebar.anchorPoint = CGPointMake(0, 0);
         sidebar.position = CGPointMake(size.width - sidebar.contentSize.width, 0);
         [sidebar.texture setAliasTexParameters];
         [self addChild:sidebar];
         
-                
+        // Next piece
         CCTexture2D *tex = [[CCTextureCache sharedTextureCache] addImage:playLayer.tileset.sourceImage];
         [tex setAliasTexParameters];
         CGRect rect = [playLayer.tileset rectForGID:playLayer.tileset.firstGid];        
@@ -68,22 +67,20 @@ enum {
         nextPiece.anchorPoint = CGPointZero;
         nextPiece.position = CGPointMake(400, 224);
         [self addChild:nextPiece];
-                
+        [self pickNextPiece];
         
+        // Quit menu item
 		CCSprite *spriteNormal = [CCSprite spriteWithFile:@"MenuItemQuit.png" rect:CGRectMake(0,12*0,34,12)];
         [spriteNormal.texture setAliasTexParameters];
 		CCSprite *spriteSelected = [CCSprite spriteWithFile:@"MenuItemQuit.png" rect:CGRectMake(0,12*1,34,12)];
 		CCMenuItemSprite *itemQuit = [CCMenuItemSprite itemFromNormalSprite:spriteNormal selectedSprite:spriteSelected disabledSprite:nil block:^(id sender) {
             [[CCDirector sharedDirector] replaceScene:[StartScreenLayer scene]];
         }];
-		
 		CCMenu *menu = [CCMenu menuWithItems:itemQuit, nil];
         menu.anchorPoint = CGPointMake(0.5, 0);
         menu.position = ccp(432, 16);
         [menu alignItemsVertically];
         [self addChild:menu];
-        
-        [self pickNextPiece];
 	}
 	return self;
 }
@@ -187,7 +184,6 @@ enum {
     // TODO I think this logic could be simplified quite a bit.
     
     // Make sure there's not already a piece there.
-    NSLog(@"piece at: %d", [playLayer tileGIDAt:pos]);
     if ([playLayer tileGIDAt:pos] > 1) {
         return false;
     }
@@ -256,5 +252,9 @@ enum {
     }
 }
 
+-(void) beginPumping
+{
+
+}
 
 @end
