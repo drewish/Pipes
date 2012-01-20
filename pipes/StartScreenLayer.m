@@ -33,13 +33,13 @@
 	// Apple recommends to re-assign "self" with the "super" return value
 	if( (self=[super init])) {        
 		// Font Item
-		CCMenuItemFont *itemNew = [CCMenuItemFont itemFromString:@"New Game" block:^(id sender) {
+        CCMenuItemFont *itemNew = [CCMenuItemFont itemWithString:@"New Game" block:^(id sender) {
             [[CCDirector sharedDirector] replaceScene: [GameLayer scene]];
         }];
-		[itemNew setFontSize:20];
+        [itemNew setFontSize:20];
 		
-		CCMenu *menu = [CCMenu menuWithItems: itemNew, nil];
-		[menu alignItemsVertically];
+        CCMenu *menu = [CCMenu menuWithItems: itemNew, nil];
+        [menu alignItemsVertically];
 
         [self addChild: menu];
 	}

@@ -72,11 +72,11 @@
         // Quit menu item
 		CCSprite *spriteNormal = [CCSprite spriteWithFile:@"MenuItemQuit.png" rect:CGRectMake(0,12*0,34,12)];
         [spriteNormal.texture setAliasTexParameters];
-		CCSprite *spriteSelected = [CCSprite spriteWithFile:@"MenuItemQuit.png" rect:CGRectMake(0,12*1,34,12)];
-		CCMenuItemSprite *itemQuit = [CCMenuItemSprite itemFromNormalSprite:spriteNormal selectedSprite:spriteSelected disabledSprite:nil block:^(id sender) {
+        CCSprite *spriteSelected = [CCSprite spriteWithFile:@"MenuItemQuit.png" rect:CGRectMake(0,12*1,34,12)];
+        CCMenuItemSprite *itemQuit = [CCMenuItemSprite itemWithNormalSprite:spriteNormal selectedSprite:spriteSelected block:^(id sender) {
             [[CCDirector sharedDirector] replaceScene:[StartScreenLayer scene]];
         }];
-		CCMenu *menu = [CCMenu menuWithItems:itemQuit, nil];
+        CCMenu *menu = [CCMenu menuWithItems:itemQuit, nil];
         menu.anchorPoint = CGPointMake(0.5, 0);
         menu.position = ccp(432, 16);
         [menu alignItemsVertically];
@@ -98,7 +98,8 @@
 
 -(void) registerWithTouchDispatcher
 {
-	[[CCTouchDispatcher sharedDispatcher] addTargetedDelegate:self priority:0 swallowsTouches:YES];
+	CCDirector *director = [CCDirector sharedDirector];
+	[[director touchDispatcher] addTargetedDelegate:self priority:0 swallowsTouches:YES];
 }
 
 -(BOOL) ccTouchBegan:(UITouch *)touch withEvent:(UIEvent *)event
@@ -239,8 +240,7 @@
     CGPoint pos;
     
     CGRect rect = [playLayer.tileset rectForGID:nextTileGid];
-    [nextPiece setTextureRectInPixels:rect rotated:NO untrimmedSize:rect.size];
-    
+    [nextPiece setTextureRect:rect rotated:NO untrimmedSize:rect.size];
 
     NSLog(@"Next is %@", [[map propertiesForGID:nextTileGid] objectForKey:@"Class"]);
     for (uint x = 0; x < size.width; x++) {
