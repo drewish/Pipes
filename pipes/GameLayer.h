@@ -14,16 +14,19 @@
 @private
     CCTMXTiledMap *map;
     CCTMXLayer *playLayer;
+    CCTMXLayer *fillLayer;
     CCTMXLayer *infoLayer;
 
     uint nextTileGid;
     CCSprite *nextPiece;
-    CCSprite *pump;
+    Tile *flowingInTile;
+    Tile *flowingFromTile;
 }
 
 // returns a CCScene that contains the HelloWorldLayer as the only child
 +(CCScene *) scene;
 -(Class)classOfGid:(uint) gid;
 -(void) pickNextPiece;
--(void) beginPumping;
+-(void) pumpNextTile;
+-(void) endGame;
 @end

@@ -41,16 +41,19 @@
         map = [CCTMXTiledMap tiledMapWithTMXFile:@"Board.tmx"];
         [self addChild:map z:-1];
         playLayer = [map layerNamed:@"Play"];
+        fillLayer = [map layerNamed:@"Fill"];
         infoLayer = [map layerNamed:@"Background"];
-        NSAssert(playLayer != nil && infoLayer != nil, @"GameLayer: couldn't find the layers");
+        NSAssert(playLayer != nil && fillLayer != nil && infoLayer != nil, @"GameLayer: couldn't find the layers");
 
         // TODO: unhardcode this:
         uint pumpGid = 9;
-        CGPoint pos = CGPointMake(0, 4);
+        CGPoint pos = CGPointMake(2, 4);
         [playLayer setTileGID:pumpGid at:pos];
-        CCSprite *tile = [playLayer tileAt:pos];
-        pump = [[[self classOfGid:pumpGid] alloc] initWithSprite: tile];
-        tile.userData = pump;
+        flowingInTile = [[[self classOfGid:pumpGid] alloc] initWithPosition:pos];
+        flowingFromTile = [[TileEmpty alloc] init];
+        
+        // Set the pump to start in 5 seconds.
+        [self schedule:@selector(pumpNextTile) interval:3 repeat:100 delay:7];
         
         // Sidebar
         CCSprite *sidebar = [CCSprite spriteWithFile:@"Sidebar.png"];
@@ -107,6 +110,11 @@
     return YES;
 }
 
+-(BOOL) isValidPosition:(CGPoint) pos
+{
+    return pos.x >= 0 && pos.y >= 0 && pos.x < map.mapSize.width && pos.y < map.mapSize.height;
+}
+
 -(CGPoint) tilePositionFromTouch:(UITouch*) touch
 {
     CGPoint inPoints = [map convertTouchToNodeSpace:touch];
@@ -128,8 +136,13 @@
 
 -(void) ccTouchEnded:(UITouch *)touch withEvent:(UIEvent *)event
 {
+    // TODO figure out the right way to know that the game is over
+    if (!nextPiece.visible) {
+        return;
+    }
+    
     CGPoint pos = [self tilePositionFromTouch:touch];    
-    if (pos.x > map.mapSize.width - 1 || pos.y > map.mapSize.height - 1 || [infoLayer tileGIDAt:pos] != 14) {
+    if ([self isValidPosition:pos] == false || [infoLayer tileGIDAt:pos] != 14) {
         return;
     }
     
@@ -162,19 +175,19 @@
 
 -(Class)classNorthOf:(CGPoint) pos
 {
-    return [self classOfGid:[playLayer tileGIDAt:CGPointMake(pos.x, pos.y - 1)]]; 
+    return [self classOfGid:[playLayer tileGIDAt:ccpAdd(pos, GoNorth)]];
 }
 -(Class)classEastOf:(CGPoint) pos
 {
-    return [self classOfGid:[playLayer tileGIDAt:CGPointMake(pos.x + 1, pos.y)]];    
+    return [self classOfGid:[playLayer tileGIDAt:ccpAdd(pos, GoEast)]];
 }
 -(Class)classSouthOf:(CGPoint) pos
 {
-    return [self classOfGid:[playLayer tileGIDAt:CGPointMake(pos.x, pos.y + 1)]];
+    return [self classOfGid:[playLayer tileGIDAt:ccpAdd(pos, GoSouth)]];
 }
 -(Class)classWestOf:(CGPoint) pos
 {
-    return [self classOfGid:[playLayer tileGIDAt:CGPointMake(pos.x - 1, pos.y)]];
+    return [self classOfGid:[playLayer tileGIDAt:ccpAdd(pos, GoWest)]];
 }
 
 -(BOOL) couldPlay:(Class) nextTileClass at:(CGPoint) pos
@@ -188,6 +201,7 @@
     if ([playLayer tileGIDAt:pos] > 1) {
         return false;
     }
+    return true;
     
     // North
     if ([nextTileClass connectNorth] && pos.y == 0) {
@@ -242,19 +256,48 @@
     CGRect rect = [playLayer.tileset rectForGID:nextTileGid];
     [nextPiece setTextureRect:rect rotated:NO untrimmedSize:rect.size];
 
-    NSLog(@"Next is %@", [[map propertiesForGID:nextTileGid] objectForKey:@"Class"]);
     for (uint x = 0; x < size.width; x++) {
         for (uint y = 0; y < size.height; y++) {
-            pos = CGPointMake(x, y);
-            uint tileGid = [self couldPlay:nextTileClass at:pos] ? 14 : 15;
+            pos = ccp(x, y);
+            uint tileGid ;
+            // Make sure there's not already a piece there.
+            if ([playLayer tileGIDAt:pos] > 1) {
+                tileGid = 13; 
+            }
+            else {
+                tileGid = [self couldPlay:nextTileClass at:pos] ? 14 : 15;
+            }
             [infoLayer setTileGID:tileGid at:pos];
         }
     }
 }
 
--(void) beginPumping
+-(void) pumpNextTile
 {
+    [fillLayer setTileGID:20 at:flowingInTile.position];
 
+    CGPoint direction = [flowingInTile flowDirectionFrom:flowingFromTile.position];
+    NSAssert(!CGPointEqualToPoint(direction, CGPointZero), @"The tile doesn't give us a direction.");
+
+    CGPoint nextPos = ccpAdd(flowingInTile.position, direction);
+    if (![self isValidPosition:nextPos]) {
+        [self endGame];
+        return;
+    }
+    
+    Tile *nextTile = [[[self classOfGid:[playLayer tileGIDAt:nextPos]] alloc] initWithPosition:nextPos];       
+    if (![nextTile canFlowFrom:flowingInTile.position]) {
+        [self endGame];
+        return;
+    }
+    flowingFromTile = flowingInTile;
+    flowingInTile = nextTile;
 }
 
+
+-(void) endGame
+{
+    [self unschedule:@selector(pumpNextTile)];
+    nextPiece.visible = false;
+}
 @end

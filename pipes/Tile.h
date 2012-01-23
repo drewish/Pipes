@@ -8,24 +8,57 @@
 
 #import "cocos2d.h"
 
+extern const CGPoint GoNorth;
+extern const CGPoint GoSouth;
+extern const CGPoint GoEast;
+extern const CGPoint GoWest;
+
+static inline BOOL
+isNorthOf(const CGPoint visitor, const CGPoint location)
+{
+	return (visitor.x == location.x && visitor.y + 1 == location.y);
+}
+static inline BOOL
+isEastOf(const CGPoint visitor, const CGPoint location)
+{
+	return (visitor.x == location.x + 1 && visitor.y == location.y);
+}
+static inline BOOL
+isSouthOf(const CGPoint visitor, const CGPoint location)
+{
+	return (visitor.x == location.x && visitor.y == location.y + 1);
+}
+static inline BOOL
+isWestOf(const CGPoint visitor, const CGPoint location)
+{
+	return (visitor.x + 1 == location.x && visitor.y == location.y);
+}
+
+
 @interface Tile : NSObject {
   @protected
-    CCSprite *sprite;
+    CGPoint pos;
+    
 }
-@property(readonly) CCSprite *sprite;
+@property(readonly) CGPoint position;
 
 +(BOOL)connectNorth;
 +(BOOL)connectEast;
 +(BOOL)connectSouth;
 +(BOOL)connectWest;
--(id)initWithSprite:(CCSprite*) s;
+
+-(id)initWithPosition:(CGPoint) pos;
+
+-(BOOL)canFlowFrom:(CGPoint) source;
+-(CGPoint)flowDirectionFrom:(CGPoint) source;
+
 -(void)flowInFromNorth;
 -(void)flowInFromEast;
 -(void)flowInFromSouth;
 -(void)flowInFromWest;
 @end
 
-@interface TileEmpty : Tile 
+@interface TileEmpty : Tile
 @end
 
 @interface TilePump : Tile
